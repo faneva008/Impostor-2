@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Imposteur Juridique</title>
+    <meta name="theme-color" content="#FAF6F9">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+    <link rel="stylesheet" href="tailwind.css">
+    <link rel="stylesheet" href="fontawesome/all.min.css">
+    <link rel="stylesheet" href="fonts/fonts.css">
+    <link rel="stylesheet" href="mobile.css">
+
+
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: #FAF6F9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #1E1926;
+            touch-action: manipulation;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Pulse glow animation */
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.06); opacity: 1; }
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        /* Cloud Fog Overlay */
+        .cloud-fog-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(253,240,246,0.96), rgba(245,235,248,0.98));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out, transform 0.3s ease-in-out;
+            opacity: 1;
+            filter: blur(0px);
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .cloud-fog-overlay.dissolved {
+            opacity: 0;
+            filter: blur(24px);
+            transform: scale(1.12);
+            pointer-events: none;
+        }
+
+        @keyframes cloud-float-1 {
+            0%, 100% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(8px, -4px) scale(1.03); }
+        }
+        @keyframes cloud-float-2 {
+            0%, 100% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(-8px, 4px) scale(0.98); }
+        }
+
+        .animate-cloud-1 {
+            animation: cloud-float-1 6s infinite ease-in-out;
+        }
+        .animate-cloud-2 {
+            animation: cloud-float-2 7s infinite ease-in-out reverse;
+        }
+
+        /* Page step display */
+        .page-step {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .page-step.active {
+            display: flex;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex justify-center items-center p-0 md:p-4">
+
+    <!-- Main Mobile Frame Simulation -->
+    <div id="app-shell" class="w-full max-w-md min-h-screen md:min-h-0 md:max-h-[850px] bg-appBg md:rounded-[40px] md:shadow-2xl overflow-hidden flex flex-col justify-between relative border-0 md:border-8 md:border-white">
+
+        <!-- HEADER BAR -->
+        <header id="app-header" class="px-5 pt-3 pb-1 flex justify-between items-center z-10">
+            <h1 id="header-title" class="text-xl font-extrabold text-appDark tracking-tight">Trouve l'imposteur</h1>
+            <div class="flex items-center space-x-2">
+                <button aria-label="Règles du jeu" onclick="openRulesModal()" class="w-9 h-9 rounded-full bg-white shadow-card flex items-center justify-center text-appDark hover:bg-gray-50 transition">
+                    <i class="fa-regular fa-circle-question text-base"></i>
+                </button>
+                <button aria-label="Retour à l’accueil" onclick="requestHome()" class="w-9 h-9 rounded-full bg-white shadow-card flex items-center justify-center text-appDark hover:bg-gray-50 transition">
+                    <i class="fa-solid fa-house text-xs"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN SCROLLABLE CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto px-5 py-1.5 no-scrollbar relative flex flex-col justify-start">
+
+            <!-- ================= PAGE 1 : CONFIGURATION (HOME) ================= -->
+            <div id="step-config" class="page-step active flex-1 flex-col space-y-2">
+                
+                <!-- Info Banner -->
+                <div class="p-3 rounded-2xl bg-gradient-to-r from-pink-100/80 via-purple-50 to-pink-50 border border-pink-200/40 flex items-center space-x-3 shadow-sm">
+                    <div class="w-8 h-8 rounded-xl bg-appPink/10 text-appPink flex items-center justify-center flex-shrink-0 text-sm">
+                        ⚖️
+                    </div>
+                    <div>
+                        <h2 class="text-xs font-bold text-appDark">Une seule audience, un seul téléphone 🎉</h2>
+                        <p class="text-[10.5px] text-appMuted leading-tight mt-0.5">
+                            Passez l'appareil à chaque juriste pour révéler son rôle secret.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CONFIGURATION SECTION -->
+                <div class="space-y-1.5">
+                    <span class="text-[10px] font-extrabold text-appMuted tracking-wider uppercase pl-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-sliders text-appPink text-[10px]"></i> CONFIGURATION
+                    </span>
+
+                    <!-- Joueurs Card -->
+                    <div onclick="openPlayersModal()" class="p-3 rounded-2xl bg-white shadow-card border border-gray-100 flex items-center justify-between cursor-pointer hover:border-pink-200 transition">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-xl bg-pink-100 text-appPink flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-bold text-appDark">Plaideurs (Joueurs)</h3>
+                                <p id="players-summary-text" class="text-[10.5px] text-appMuted">Maître Dupont, Maître Marie, Maître Sarah, Maître Lucas</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+                    </div>
+
+                    <!-- Catégories Card -->
+                    <div onclick="openCategoriesModal()" class="p-3 rounded-2xl bg-white shadow-card border border-gray-100 flex items-center justify-between cursor-pointer hover:border-pink-200 transition">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-scale-balanced"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-bold text-appDark">Domaines du Droit</h3>
+                                <p id="categories-summary-text" class="text-[10.5px] text-appMuted">Droit Civil, Droit Pénal, Affaires</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+                    </div>
+
+                    <!-- Imposteurs Card -->
+                    <div onclick="toggleImpostorCount()" class="p-3 rounded-2xl bg-white shadow-card border border-gray-100 flex items-center justify-between cursor-pointer hover:border-pink-200 transition">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-user-ninja"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-bold text-appDark">Nombre d'imposteurs</h3>
+                                <p id="impostor-summary-text" class="text-[10.5px] text-appMuted">1 Imposteur dans l'assemblée</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full border border-purple-100">Modifier</span>
+                    </div>
+                </div>
+
+                <!-- RULES SECTION -->
+                <div class="space-y-1.5 pt-0.5">
+                    <span class="text-[10px] font-extrabold text-appMuted tracking-wider uppercase pl-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-gavel text-appPink text-[10px]"></i> RÈGLES
+                    </span>
+
+                    <!-- Indice Toggle Card -->
+                    <div class="p-3 rounded-2xl bg-white shadow-card border border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center text-xs">
+                                <i class="fa-regular fa-lightbulb"></i>
+                            </div>
+                            <div class="pr-2">
+                                <h3 class="text-xs font-bold text-appDark">Afficher un indice à l'imposteur</h3>
+                                <p class="text-[10px] text-appMuted leading-tight">Fournit une notion proche pour s'intégrer au débat.</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                            <input type="checkbox" id="rule-hint-toggle" aria-label="Afficher un indice à l’imposteur" class="sr-only peer" checked>
+                            <div class="w-10 h-5.5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-appPink"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 2 : PREPARE PASS PHONE ================= -->
+            <div id="step-prepare" class="page-step flex-1 flex-col items-center justify-center text-center space-y-2 py-1">
+                <div class="space-y-0.5">
+                    <p class="text-[11px] font-bold text-appMuted uppercase tracking-wider">Passer le téléphone à</p>
+                    <div class="inline-flex items-center space-x-2 bg-pink-50 border border-pink-100 px-3.5 py-0.5 rounded-full mt-0.5">
+                        <div id="prepare-player-avatar" class="w-5 h-5 rounded-full bg-appPink text-white font-bold text-[10px] flex items-center justify-center">
+                            J
+                        </div>
+                        <span id="prepare-player-name" class="text-xs font-extrabold text-appDark uppercase tracking-wide">JOUEUR 1</span>
+                    </div>
+                </div>
+
+                <!-- SECRET CARD CONTAINER WITH FOG OVERLAY -->
+                <div class="w-full relative min-h-[190px] flex items-center justify-center">
+                    
+                    <!-- UNDERLYING SECRET CARD (Revealed when fog dissipates) -->
+                    <div id="role-card-container" aria-hidden="true" class="w-full bg-white rounded-3xl p-4 shadow-card border-2 border-emerald-400/80 flex flex-col items-center space-y-2 relative overflow-hidden transition-all min-h-[190px] justify-center">
+                        <div id="reveal-status-icon" class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-base">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+
+                        <div class="space-y-0.5 w-full">
+                            <span id="reveal-role-type" class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-600">VOUS ÊTES JURISTE (MOT SECRET)</span>
+                            <h3 id="reveal-word" class="text-lg font-black text-emerald-700 tracking-tight">Abus de droit</h3>
+                        </div>
+
+                        <div id="reveal-definition-box" class="p-2.5 rounded-2xl bg-emerald-50/60 border border-emerald-100 text-[11px] text-emerald-900 leading-snug w-full">
+                            Exercice d'un droit dépassant les limites normales dans le seul but de nuire à autrui.
+                        </div>
+                    </div>
+
+                    <!-- FOG / CLOUD OVERLAY -->
+                    <div id="cloud-fog-overlay" class="cloud-fog-overlay shadow-md border border-pink-100/50 p-3.5">
+                        <div class="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none opacity-40">
+                            <div class="absolute -top-4 -left-4 text-pink-300/40 text-7xl animate-cloud-1">
+                                <i class="fa-solid fa-cloud"></i>
+                            </div>
+                            <div class="absolute top-1/2 -right-6 text-purple-300/30 text-8xl animate-cloud-2">
+                                <i class="fa-solid fa-cloud"></i>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 flex flex-col items-center space-y-1">
+                            <div class="w-9 h-9 rounded-2xl bg-appPink/10 text-appPink flex items-center justify-center text-base animate-bounce">
+                                ☁️
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-extrabold text-appDark">Mot caché sous les nuages</h3>
+                                <p class="text-[10px] text-appMuted mt-0.5 max-w-[200px]">
+                                    Maintenez l'empreinte pour dissiper les nuages et voir votre rôle.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FINGERPRINT HOLD BUTTON -->
+                <div class="flex flex-col items-center space-y-1 pt-0.5">
+                    <div role="button" tabindex="0" aria-label="Maintenir pour révéler votre rôle" id="fingerprint-btn" class="w-14 h-14 rounded-full bg-gradient-to-tr from-pink-500 to-pink-400 text-white flex items-center justify-center text-xl shadow-btn cursor-pointer active:scale-95 transition-transform animate-pulse-glow select-none">
+                        <i class="fa-solid fa-fingerprint"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-appMuted tracking-wide flex items-center gap-1">
+                        <i class="fa-solid fa-hand-pointer text-appPink text-[10px]"></i> MAINTENIR POUR REVOIR
+                    </span>
+                </div>
+
+                <!-- Privacy Warning Banner -->
+                <div class="inline-flex items-center space-x-1.5 bg-amber-50 border border-amber-200/60 px-3 py-1 rounded-xl text-amber-700 text-[10px] font-semibold shadow-sm">
+                    <i class="fa-solid fa-eye-slash text-amber-500"></i>
+                    <span>NE MONTREZ PAS VOTRE ÉCRAN AUX AUTRES</span>
+                </div>
+            </div>
+
+            <!-- ================= PAGE 3 : DISCUSSION PHASE ================= -->
+            <div id="step-discussion" class="page-step flex-1 flex-col items-center justify-center text-center space-y-3 py-1">
+                
+                <div class="space-y-0.5">
+                    <div class="inline-flex items-center space-x-1.5 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-emerald-600 text-[10px] font-extrabold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>PHASE DE DISCUSSION • EN DIRECT</span>
+                    </div>
+                    <h2 class="text-base font-black text-appDark">Plaidoiries en cours</h2>
+                </div>
+
+                <!-- First Speaker Card -->
+                <div class="w-full bg-white rounded-3xl p-4 shadow-card border border-pink-100 space-y-2.5 flex flex-col items-center">
+                    <div class="inline-flex items-center space-x-2 bg-appLightPink text-appPink px-2.5 py-0.5 rounded-full">
+                        <span class="text-[9.5px] font-extrabold uppercase">PREMIER PLAIDEUR</span>
+                    </div>
+
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-pink-100 to-purple-100 text-appPink flex items-center justify-center text-xl shadow-inner border-2 border-white">
+                        🎙️
+                    </div>
+
+                    <div>
+                        <h3 id="discussion-turn-player" class="text-base font-black text-appDark">Maître Dupont commence</h3>
+                        <p class="text-[11px] text-appMuted mt-0.5 leading-tight max-w-xs">
+                            C'est à vous de donner le tout premier indice ! Puis passez la parole autour de la table.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Guidance Info Box -->
+                <div class="p-2.5 rounded-2xl bg-white/80 border border-gray-100 text-[11px] text-appMuted leading-tight max-w-xs shadow-sm">
+                    💡 <strong class="text-appDark">Conseil Juridique :</strong> L'imposteur n'a pas le terme exact. Écoutez attentivement les indices !
+                </div>
+            </div>
+
+            <!-- ================= PAGE 4 : VERDICT & REVEAL ================= -->
+            <div id="step-verdict" class="page-step flex-1 flex-col items-center justify-center text-center space-y-3 py-1">
+                <div class="space-y-0.5">
+                    <p class="text-[10px] font-bold text-appMuted uppercase tracking-wider">Le Tribunal a tranché</p>
+                    <h2 class="text-lg font-black text-appDark">Verdict de l'Audience ⚖️</h2>
+                </div>
+
+                <!-- VERDICT RESULT CARD -->
+                <div class="w-full bg-white rounded-3xl p-4 shadow-card border border-gray-100 space-y-2.5">
+                    
+                    <!-- Secret Word Card -->
+                    <div class="p-3 rounded-2xl bg-pink-50/80 border border-pink-100 text-center space-y-0.5">
+                        <span class="text-[9.5px] font-extrabold text-appPink uppercase tracking-widest">LE MOT JURIDIQUE SECRET</span>
+                        <h3 id="verdict-word-title" class="text-lg font-black text-appDark">Résolution du contrat</h3>
+                        <p id="verdict-word-def" class="text-[11px] text-appDark/80 pt-0.5 leading-snug">
+                            Anéantissement rétroactif d'un contrat synallagmatique en raison de l'inexécution de ses obligations.
+                        </p>
+                    </div>
+
+                    <!-- Impostor Reveal Box -->
+                    <div class="p-3 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-between">
+                        <div class="flex items-center space-x-2.5 text-left">
+                            <div class="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center text-sm flex-shrink-0">
+                                🥷
+                            </div>
+                            <div>
+                                <span id="verdict-impostor-label" class="text-[9.5px] font-extrabold text-purple-600 uppercase tracking-wide">L'IMPOSTEUR ÉTAIT</span>
+                                <h4 id="verdict-impostor-name" class="text-xs font-bold text-appDark">Maître Sarah</h4>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-extrabold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">Démasqué</span>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+
+        <!-- BOTTOM FIXED CTA BAR -->
+        <footer id="app-footer" class="p-4 pt-1 pb-10 md:pb-6 mb-2 bg-appBg z-10 flex space-x-2.5">
+            <button aria-label="Règles du jeu" id="footer-side-btn" onclick="openRulesModal()" class="w-11 h-11 rounded-2xl bg-pink-100 text-appPink flex items-center justify-center text-base shadow-sm hover:bg-pink-200 transition flex-shrink-0">
+                <i class="fa-solid fa-ribbon"></i>
+            </button>
+
+            <button id="main-action-btn" onclick="handleMainAction()" class="flex-1 h-11 rounded-2xl bg-appPink hover:bg-appPinkHover text-white font-extrabold text-xs tracking-wide shadow-btn flex items-center justify-center space-x-2 transition-all active:scale-[0.98]">
+                <span id="main-btn-text">LANCER LA PARTIE</span>
+                <i id="main-btn-icon" class="fa-solid fa-play text-[10px] ml-1"></i>
+            </button>
+        </footer>
+
+    </div>
+
+    <!-- MODAL 1 : PLAYERS MANAGEMENT -->
+    <div id="modal-players" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-end md:items-center justify-center p-0 md:p-4">
+        <div class="w-full max-w-md bg-white rounded-t-3xl md:rounded-3xl p-5 space-y-3 max-h-[85vh] flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                <h3 class="text-sm font-extrabold text-appDark">Liste des Plaideurs (3 à 10)</h3>
+                <button aria-label="Fermer" onclick="closeModal('modal-players')" class="text-gray-400 hover:text-gray-600 p-1">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="flex space-x-2">
+                <input type="text" id="new-player-input" maxlength="32" autocomplete="off" enterkeyhint="done" aria-label="Nom du joueur" placeholder="Nom de l'avocat / juriste..." class="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-appPink text-appDark">
+                <button onclick="addPlayer()" class="bg-appPink text-white px-4 rounded-2xl font-bold text-xs hover:bg-appPinkHover transition">
+                    + Ajouter
+                </button>
+            </div>
+
+            <div id="players-list-container" class="space-y-1.5 overflow-y-auto max-h-56 pr-1 no-scrollbar flex-1">
+                <!-- Dynamic Player Rows -->
+            </div>
+
+            <button onclick="savePlayersModal()" class="w-full py-3 bg-appDark text-white rounded-2xl font-bold text-xs shadow-sm hover:bg-gray-800 transition">
+                Valider les participants
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 2 : CATEGORIES SELECTION -->
+    <div id="modal-categories" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-end md:items-center justify-center p-0 md:p-4">
+        <div class="w-full max-w-md bg-white rounded-t-3xl md:rounded-3xl p-5 space-y-3 max-h-[85vh] flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                <h3 class="text-sm font-extrabold text-appDark">Domaines du Droit</h3>
+                <button aria-label="Fermer" onclick="closeModal('modal-categories')" class="text-gray-400 hover:text-gray-600 p-1">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div id="categories-list-container" class="space-y-2 overflow-y-auto max-h-60 pr-1 no-scrollbar">
+                <!-- Dynamic Category Items -->
+            </div>
+
+            <button onclick="saveCategoriesModal()" class="w-full py-3 bg-appPink text-white rounded-2xl font-bold text-xs shadow-btn hover:bg-appPinkHover transition">
+                Enregistrer la sélection
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 3 : RULES / HOW TO PLAY -->
+    <div id="modal-rules" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-end md:items-center justify-center p-0 md:p-4">
+        <div class="w-full max-w-md bg-white rounded-t-3xl md:rounded-3xl p-5 space-y-3 max-h-[85vh] flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                <h3 class="text-sm font-extrabold text-appDark">Règles de l'Audience ⚖️</h3>
+                <button aria-label="Fermer" onclick="closeModal('modal-rules')" class="text-gray-400 hover:text-gray-600 p-1">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="space-y-2.5 text-xs text-appDark/80 leading-relaxed overflow-y-auto max-h-64 pr-1 no-scrollbar">
+                <div class="p-2.5 bg-pink-50 rounded-2xl border border-pink-100">
+                    <strong class="text-appPink">1. Distribution :</strong> Passez le téléphone à chaque joueur. Maintenez le capteur appuyé pour lire votre rôle en secret.
+                </div>
+                <div class="p-2.5 bg-blue-50 rounded-2xl border border-blue-100">
+                    <strong class="text-blue-600">2. Plaidoiries :</strong> Chaque juriste reçoit le MÊME terme secret. L'Imposteur ne reçoit rien (ou un petit indice). À voix haute, chacun donne UN indice subtil.
+                </div>
+                <div class="p-2.5 bg-purple-50 rounded-2xl border border-purple-100">
+                    <strong class="text-purple-600">3. Délibération :</strong> Débattez et désignez à l'unanimité le juriste imposteur qui s'est révélé trop vague !
+                </div>
+            </div>
+
+            <button aria-label="Fermer" onclick="closeModal('modal-rules')" class="w-full py-3 bg-appDark text-white rounded-2xl font-bold text-xs">
+                Compris !
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /* ================= GAME DATASET ================= */
+        const LEGAL_DATABASE = [
+            {
+                category: "Droit Civil & Obligations",
+                term: "Abus de droit",
+                definition: "Exercice d'un droit dépassant ses limites normales dans le seul but de causer un préjudice à autrui.",
+                fakeHint: "Responsabilité civile"
+            },
+            {
+                category: "Droit Civil & Obligations",
+                term: "Résolution du contrat",
+                definition: "Anéantissement rétroactif d'un contrat en raison de l'inexécution d'une obligation par l'une des parties.",
+                fakeHint: "Résiliation"
+            },
+            {
+                category: "Droit Civil & Obligations",
+                term: "Vice du consentement",
+                definition: "Fait d'altérer la volonté d'un contractant par Erreur, Dol ou Violence lors de la conclusion du contrat.",
+                fakeHint: "Nullité absolue"
+            },
+            {
+                category: "Droit Civil & Obligations",
+                term: "Clause pénale",
+                definition: "Clause par laquelle les parties évaluent par avance et forfaitairement les dommages-intérêts dus en cas d'inexécution.",
+                fakeHint: "Acompte préalable"
+            },
+            {
+                category: "Droit Pénal",
+                term: "Légitime défense",
+                definition: "Fait de riposter de manière proportionnée et immédiate à une attaque injustifiée contre soi ou autrui.",
+                fakeHint: "État de nécessité"
+            },
+            {
+                category: "Droit Pénal",
+                term: "Abus de confiance",
+                definition: "Fait de détourner, au préjudice d'autrui, des fonds ou biens qui ont été remis à charge de les rendre.",
+                fakeHint: "Escroquerie"
+            },
+            {
+                category: "Droit Pénal",
+                term: "Prescription de l'action publique",
+                definition: "Extinction du droit du ministère public de poursuivre l'auteur d'une infraction après écoulement du délai légal.",
+                fakeHint: "Non-lieu temporaire"
+            },
+            {
+                category: "Droit des Affaires & Commercial",
+                term: "Fonds de commerce",
+                definition: "Ensemble d'éléments mobiliers corporels et incorporels affectés à l'exercice d'une activité commerciale.",
+                fakeHint: "Bail commercial"
+            },
+            {
+                category: "Droit des Affaires & Commercial",
+                term: "Abus de biens sociaux",
+                definition: "Usage de mauvaise foi par des dirigeants de biens de la société contraire à son intérêt à des fins personnelles.",
+                fakeHint: "Détournement de fonds"
+            },
+            {
+                category: "Droit Constitutionnel & Public",
+                term: "Bloc de constitutionnalité",
+                definition: "Ensemble des normes constitutionnelles de référence (Constitution de 1958, DDHC, Préambule de 1946).",
+                fakeHint: "Hiérarchie des normes"
+            }
+        ];
+
+        /* ================= GAME STATE ================= */
+        let state = {
+            players: ["Maître Dupont", "Maître Marie", "Maître Sarah", "Maître Lucas"],
+            categories: ["Droit Civil & Obligations", "Droit Pénal", "Droit des Affaires & Commercial"],
+            impostorCount: 1,
+            giveHintToImpostor: true,
+            
+            currentStep: 'config',
+            currentPlayerIndex: 0,
+            selectedLegalTerm: null,
+            impostorIndexes: [],
+            firstSpeakerIndex: 0
+        };
+
+        /* ================= INITIALIZATION ================= */
+        window.onload = function() {
+            loadPreferences();
+            document.getElementById('rule-hint-toggle').checked = state.giveHintToImpostor;
+            document.getElementById('rule-hint-toggle').addEventListener('change', function() {
+                state.giveHintToImpostor = this.checked;
+                savePreferences();
+            });
+            document.getElementById('new-player-input').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') { e.preventDefault(); addPlayer(); }
+            });
+            document.querySelectorAll('[id^="modal-"]').forEach(modal => {
+                modal.setAttribute('role', 'dialog');
+                modal.setAttribute('aria-modal', 'true');
+                modal.setAttribute('aria-label', modal.querySelector('h3').textContent);
+                modal.addEventListener('click', e => { if (e.target === modal) closeModal(modal.id); });
+            });
+            updateUIConfigSummaries();
+            renderPlayersList();
+            renderCategoriesList();
+            setupFingerprintHoldListener();
+        };
+
+        function switchStep(stepName) {
+            hideSecret();
+            state.currentStep = stepName;
+            document.querySelector('main').scrollTop = 0;
+            document.querySelectorAll('.page-step').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${stepName}`).classList.add('active');
+
+            const headerTitle = document.getElementById('header-title');
+            const mainBtnText = document.getElementById('main-btn-text');
+            const mainBtnIcon = document.getElementById('main-btn-icon');
+
+            if (stepName === 'config') {
+                headerTitle.textContent = "Trouve l'imposteur";
+                mainBtnText.textContent = "LANCER LA PARTIE";
+                mainBtnIcon.className = "fa-solid fa-play text-[10px] ml-1";
+            } else if (stepName === 'prepare') {
+                const pName = state.players[state.currentPlayerIndex];
+                headerTitle.textContent = "Distribution des rôles";
+                document.getElementById('prepare-player-name').textContent = pName;
+                document.getElementById('prepare-player-avatar').textContent = pName.charAt(0).toUpperCase();
+                
+                const isImpostor = state.impostorIndexes.includes(state.currentPlayerIndex);
+                renderRoleCard(isImpostor);
+                hideSecret();
+
+                const isLastPlayer = state.currentPlayerIndex === state.players.length - 1;
+                mainBtnText.textContent = isLastPlayer ? "LANCER L'AUDIENCE" : "JOUEUR SUIVANT";
+                mainBtnIcon.className = "fa-solid fa-arrow-right text-[10px] ml-1";
+            } else if (stepName === 'discussion') {
+                headerTitle.textContent = "Audience Publique";
+                // Sélection aléatoire du joueur qui commence
+                state.firstSpeakerIndex = Math.floor(Math.random() * state.players.length);
+                renderDiscussionTurn();
+                mainBtnText.textContent = "RÉVÉLER L'IMPOSTEUR";
+                mainBtnIcon.className = "fa-solid fa-eye text-[10px] ml-1";
+            } else if (stepName === 'verdict') {
+                headerTitle.textContent = "Verdict Final";
+                renderVerdictScreen();
+                mainBtnText.textContent = "NOUVELLE PARTIE";
+                mainBtnIcon.className = "fa-solid fa-rotate-right text-[10px] ml-1";
+            }
+        }
+
+        /* ================= HOLD TO REVEAL CLOUD MECHANIC ================= */
+        function setupFingerprintHoldListener() {
+            const btn = document.getElementById('fingerprint-btn');
+            let activePointer = null;
+            btn.addEventListener('pointerdown', e => {
+                if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+                e.preventDefault();
+                activePointer = e.pointerId;
+                btn.setPointerCapture(e.pointerId);
+                showSecret();
+            });
+            const end = () => { activePointer = null; hideSecret(); };
+            btn.addEventListener('pointermove', e => {
+                if (e.pointerId !== activePointer) return;
+                const r = btn.getBoundingClientRect();
+                if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) end();
+            });
+            ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(type => btn.addEventListener(type, end));
+            window.addEventListener('pointerup', end);
+            window.addEventListener('blur', end);
+            window.addEventListener('pagehide', end);
+            document.addEventListener('visibilitychange', end);
+            btn.addEventListener('keydown', e => {
+                if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); showSecret(); }
+            });
+            btn.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') end(); });
+            btn.addEventListener('blur', end);
+            btn.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') handleAndroidBack(); });
+        }
+
+        function showSecret() {
+            if (state.currentStep !== 'prepare') return;
+            document.getElementById('role-card-container').setAttribute('aria-hidden', 'false');
+            document.getElementById('cloud-fog-overlay').classList.add('dissolved');
+        }
+
+        function hideSecret() {
+            document.getElementById('role-card-container').setAttribute('aria-hidden', 'true');
+            document.getElementById('cloud-fog-overlay').classList.remove('dissolved');
+        }
+
+        function renderRoleCard(isImpostor) {
+            const cardContainer = document.getElementById('role-card-container');
+            const statusIcon = document.getElementById('reveal-status-icon');
+            const roleType = document.getElementById('reveal-role-type');
+            const wordElem = document.getElementById('reveal-word');
+            const defBox = document.getElementById('reveal-definition-box');
+
+            if (!isImpostor) {
+                cardContainer.className = "w-full bg-white rounded-3xl p-4 shadow-card border-2 border-emerald-400/80 flex flex-col items-center space-y-2 relative overflow-hidden transition-all min-h-[190px] justify-center";
+                statusIcon.className = "w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-base";
+                statusIcon.innerHTML = `<i class="fa-solid fa-scale-balanced"></i>`;
+                
+                roleType.className = "text-[10px] font-extrabold uppercase tracking-widest text-emerald-600";
+                roleType.textContent = "VOUS ÊTES JURISTE (MOT SECRET)";
+
+                wordElem.className = "text-lg font-black text-emerald-700 tracking-tight";
+                wordElem.textContent = state.selectedLegalTerm.term;
+
+                defBox.className = "p-2.5 rounded-2xl bg-emerald-50/60 border border-emerald-100 text-[11px] text-emerald-900 leading-snug w-full";
+                defBox.textContent = state.selectedLegalTerm.definition;
+            } else {
+                cardContainer.className = "w-full bg-white rounded-3xl p-4 shadow-card border-2 border-appPink/80 flex flex-col items-center space-y-2 relative overflow-hidden transition-all min-h-[190px] justify-center";
+                statusIcon.className = "w-9 h-9 rounded-full bg-pink-100 text-appPink flex items-center justify-center text-base";
+                statusIcon.innerHTML = `<i class="fa-solid fa-user-ninja"></i>`;
+
+                roleType.className = "text-[10px] font-extrabold uppercase tracking-widest text-appPink";
+                roleType.textContent = "🔴 VOUS ÊTES L'IMPOSTEUR";
+
+                wordElem.className = "text-lg font-black text-appPink tracking-tight";
+                wordElem.textContent = "Imposteur !";
+
+                defBox.className = "p-2.5 rounded-2xl bg-pink-50 border border-pink-100 text-[11px] text-appPink leading-snug w-full";
+                
+                if (state.giveHintToImpostor && state.selectedLegalTerm.fakeHint) {
+                    defBox.innerHTML = `💡 <strong>Indice de sous-domaine :</strong> La notion concerne l'idée de : <em>"${state.selectedLegalTerm.fakeHint}"</em>. Soyez convaincant !`;
+                } else {
+                    defBox.textContent = "Vous n'avez pas le mot secret. Écoutez attentivement les indices des juristes pour deviner la notion et bluffez !";
+                }
+            }
+        }
+
+        function renderDiscussionTurn() {
+            const firstSpeaker = state.players[state.firstSpeakerIndex];
+            document.getElementById('discussion-turn-player').textContent = `${firstSpeaker} commence la plaidoirie !`;
+        }
+
+        function renderVerdictScreen() {
+            document.getElementById('verdict-word-title').textContent = state.selectedLegalTerm.term;
+            document.getElementById('verdict-word-def').textContent = state.selectedLegalTerm.definition;
+
+            const impostorNames = state.impostorIndexes.map(idx => state.players[idx]).join(', ');
+            document.getElementById('verdict-impostor-name').textContent = impostorNames;
+            document.getElementById('verdict-impostor-label').textContent = state.impostorIndexes.length > 1 ? "LES IMPOSTEURS ÉTAIENT" : "L'IMPOSTEUR ÉTAIT";
+        }
+
+        /* ================= MAIN ACTION HANDLER ================= */
+        function handleMainAction() {
+            if (state.currentStep === 'config') {
+                startNewGame();
+            } else if (state.currentStep === 'prepare') {
+                if (state.currentPlayerIndex < state.players.length - 1) {
+                    state.currentPlayerIndex++;
+                    switchStep('prepare');
+                } else {
+                    switchStep('discussion');
+                }
+            } else if (state.currentStep === 'discussion') {
+                switchStep('verdict');
+            } else if (state.currentStep === 'verdict') {
+                resetGameToHome();
+            }
+        }
+
+        function startNewGame() {
+            if (state.players.length < 3) {
+                alert("Veuillez ajouter au moins 3 joueurs.");
+                return;
+            }
+
+            const filteredTerms = LEGAL_DATABASE.filter(item => state.categories.includes(item.category));
+            const pool = filteredTerms.length > 0 ? filteredTerms : LEGAL_DATABASE;
+            state.selectedLegalTerm = pool[Math.floor(Math.random() * pool.length)];
+
+            state.impostorCount = Math.min(state.impostorCount, maxImpostors());
+            state.impostorIndexes = [];
+            while (state.impostorIndexes.length < state.impostorCount) {
+                const randIdx = Math.floor(Math.random() * state.players.length);
+                if (!state.impostorIndexes.includes(randIdx)) {
+                    state.impostorIndexes.push(randIdx);
+                }
+            }
+
+            state.giveHintToImpostor = document.getElementById('rule-hint-toggle').checked;
+
+            state.currentPlayerIndex = 0;
+            switchStep('prepare');
+        }
+
+        function resetGameToHome() {
+            hideSecret();
+            state.selectedLegalTerm = null;
+            state.impostorIndexes = [];
+            state.currentPlayerIndex = 0;
+            switchStep('config');
+        }
+
+        function requestHome() {
+            hideSecret();
+            if (state.currentStep === 'config' || state.currentStep === 'verdict' || confirm('Abandonner cette partie et revenir à l’accueil ?')) resetGameToHome();
+        }
+
+        function handleAndroidBack() {
+            hideSecret();
+            const modal = document.querySelector('[id^="modal-"]:not(.hidden)');
+            if (modal) { closeModal(modal.id); return true; }
+            if (state.currentStep !== 'config') { requestHome(); return true; }
+            return false;
+        }
+
+        function maxImpostors() { return Math.min(2, Math.floor((state.players.length - 1) / 2)); }
+
+        const PREFERENCES_KEY = 'imposteur-juridique-preferences-v1';
+        function savePreferences() {
+            try { localStorage.setItem(PREFERENCES_KEY, JSON.stringify({
+                players: state.players, categories: state.categories,
+                impostorCount: state.impostorCount, giveHintToImpostor: state.giveHintToImpostor
+            })); } catch (_) { /* Le jeu reste utilisable si le stockage est indisponible. */ }
+        }
+        function loadPreferences() {
+            try {
+                const p = JSON.parse(localStorage.getItem(PREFERENCES_KEY));
+                if (!p || typeof p !== 'object') return;
+                if (Array.isArray(p.players) && p.players.length >= 3 && p.players.length <= 10 && p.players.every(n => typeof n === 'string' && n.trim() && n.length <= 32)) state.players = p.players;
+                const valid = [...new Set(LEGAL_DATABASE.map(t => t.category))];
+                if (Array.isArray(p.categories)) {
+                    const cats = valid.filter(c => p.categories.includes(c));
+                    if (cats.length) state.categories = cats;
+                }
+                state.impostorCount = p.impostorCount === 2 && maxImpostors() === 2 ? 2 : 1;
+                if (typeof p.giveHintToImpostor === 'boolean') state.giveHintToImpostor = p.giveHintToImpostor;
+            } catch (_) { /* Ignorer des préférences corrompues. */ }
+        }
+
+        /* ================= MODALS & CONFIG ================= */
+        function openPlayersModal() {
+            renderPlayersList();
+            document.getElementById('modal-players').classList.remove('hidden');
+        }
+
+        function openCategoriesModal() {
+            renderCategoriesList();
+            document.getElementById('modal-categories').classList.remove('hidden');
+        }
+
+        function openRulesModal() {
+            document.getElementById('modal-rules').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.activeElement?.blur();
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function renderPlayersList() {
+            const container = document.getElementById('players-list-container');
+            container.innerHTML = '';
+
+            state.players.forEach((player, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-gray-50 p-2.5 rounded-2xl border border-gray-100";
+                div.innerHTML = `
+                    <span class="player-name text-xs font-bold text-appDark"></span>
+                    <button aria-label="Supprimer ce joueur" ${state.players.length <= 3 ? 'disabled' : ''} onclick="removePlayer(${idx})" class="text-gray-400 hover:text-red-500 p-1">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                `;
+                div.querySelector('.player-name').textContent = player;
+                container.appendChild(div);
+            });
+        }
+
+        function addPlayer() {
+            const input = document.getElementById('new-player-input');
+            const name = input.value.trim().slice(0, 32);
+            if (state.players.length >= 10) { alert('La partie est limitée à 10 joueurs.'); return; }
+            if (name) {
+                state.players.push(name);
+                input.value = '';
+                renderPlayersList();
+                updateUIConfigSummaries();
+            }
+        }
+
+        function removePlayer(idx) {
+            if (state.players.length <= 3) {
+                return;
+            }
+            state.players.splice(idx, 1);
+            renderPlayersList();
+            updateUIConfigSummaries();
+        }
+
+        function savePlayersModal() {
+            updateUIConfigSummaries();
+            closeModal('modal-players');
+        }
+
+        function renderCategoriesList() {
+            const container = document.getElementById('categories-list-container');
+            container.innerHTML = '';
+
+            const allCategories = [
+                "Droit Civil & Obligations",
+                "Droit Pénal",
+                "Droit des Affaires & Commercial",
+                "Droit Constitutionnel & Public"
+            ];
+
+            allCategories.forEach(cat => {
+                const isChecked = state.categories.includes(cat);
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-gray-50 p-2.5 rounded-2xl border border-gray-100";
+                div.innerHTML = `
+                    <span class="text-xs font-bold text-appDark">${cat}</span>
+                    <input aria-label="${cat}" type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCategory('${cat}')" class="w-4 h-4 accent-appPink rounded-lg">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function toggleCategory(cat) {
+            if (state.categories.includes(cat)) {
+                if (state.categories.length > 1) {
+                    state.categories = state.categories.filter(c => c !== cat);
+                }
+            } else {
+                state.categories.push(cat);
+            }
+            renderCategoriesList();
+            updateUIConfigSummaries();
+        }
+
+        function saveCategoriesModal() {
+            updateUIConfigSummaries();
+            closeModal('modal-categories');
+        }
+
+        function toggleImpostorCount() {
+            if (maxImpostors() < 2) { alert('Ajoutez au moins 5 joueurs pour jouer avec 2 imposteurs.'); return; }
+            state.impostorCount = state.impostorCount === 1 ? 2 : 1;
+            updateUIConfigSummaries();
+        }
+
+        function updateUIConfigSummaries() {
+            state.impostorCount = Math.min(state.impostorCount, maxImpostors());
+            savePreferences();
+            document.getElementById('players-summary-text').textContent = state.players.join(', ');
+            document.getElementById('categories-summary-text').textContent = state.categories.join(', ');
+            document.getElementById('impostor-summary-text').textContent = `${state.impostorCount} Imposteur${state.impostorCount > 1 ? 's' : ''} dans l'assemblée`;
+        }
+    </script>
+</body>
+</html>
